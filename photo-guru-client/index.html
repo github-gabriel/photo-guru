@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="style.css"/>
+    <title>Photo Guru</title>
+</head>
+<body>
+<div class="container">
+    <h1>Drag & Drop Images Here</h1>
+    <div id="dropzone" ondragover="return false;" ondrop="dropHandler(event)">
+        <p>Drop your images here or click to select</p>
+        <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.webp">
+    </div>
+    <div class="hint">
+        <div class="preview-grid"></div>
+        <input type="text" id="hintInput" placeholder="Enter a hint">
+        <button id="uploadButton">
+            <img src="public/start.svg">
+        </button>
+    </div>
+    <div class="output">
+        <h1>GPT 4 Vision</h1>
+        <div class="loading-container">
+            <div class="loading"></div>
+        </div>
+        <p id="answer"></p>
+    </div>
+</div>
+<script type="module" src="/app.js"></script>
+</body>
+</html>
