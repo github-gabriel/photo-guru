@@ -3,21 +3,26 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <link rel="stylesheet" href="style.css"/>
+    <link rel="stylesheet" href="styles/style.css"/>
     <title>Photo Guru</title>
 </head>
 <body>
+<div class="dark-mode-toggle">
+    <button id="toggle">
+        <img src="icons/sun.svg">
+    </button>
+</div>
 <div class="container">
     <h1>Drag & Drop Images Here</h1>
     <div id="dropzone" ondragover="return false;" ondrop="dropHandler(event)">
         <p>Drop your images here or click to select</p>
-        <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.webp">
+        <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.webp" multiple>
     </div>
     <div class="hint">
         <div class="preview-grid"></div>
-        <input type="text" id="hintInput" placeholder="Enter a hint">
+        <input type="text" id="hintInput" placeholder="Enter a hint" autocomplete="off">
         <button id="uploadButton">
-            <img src="public/start.svg">
+            <img src="icons/upload_black.svg">
         </button>
     </div>
     <div class="output">

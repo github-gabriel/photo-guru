@@ -6,9 +6,47 @@ const hintInput = document.getElementById('hintInput')
 const uploadButton = document.getElementById('uploadButton')
 const answer = document.getElementById('answer')
 
+const darkModeToggle = document.getElementById('toggle')
+
+const darkIcon = 'icons/moon.svg'
+const lightIcon = 'icons/sun.svg'
+
 let selectedFiles = null
 
 uploadButton.disabled = true
+
+window.onload = function () {
+  let theme = localStorage.getItem('theme')
+  if (theme === 'dark') {
+    setTheme('dark')
+  } else if (theme === 'light') {
+    setTheme('light')
+  }
+}
+
+darkModeToggle.addEventListener('click', function () {
+  if (document.body.classList.contains('dark-theme')) {
+    setTheme('light')
+  } else {
+    setTheme('dark')
+  }
+})
+
+function setTheme (theme) {
+  let themeImg = darkModeToggle.childNodes[1]
+  let uploadImg = document.getElementById('uploadButton').childNodes[1]
+  if (theme === 'dark') {
+    themeImg.src = darkIcon
+    uploadImg.src = 'icons/upload_white.svg'
+    localStorage.setItem('theme', 'dark')
+    document.body.classList.add('dark-theme')
+  } else if (theme === 'light') {
+    themeImg.src = lightIcon
+    uploadImg.src = 'icons/upload_black.svg'
+    localStorage.setItem('theme', 'light')
+    document.body.classList.remove('dark-theme')
+  }
+}
 
 function dropHandler (event) {
   event.preventDefault()
@@ -32,7 +70,11 @@ dropzone.addEventListener('drop', dropHandler) // Call defined function
 
 // Handle click on the input field
 fileInput.addEventListener('change', (event) => {
-  uploadFile(event.target.files)
+  event.preventDefault()
+  uploadButton.disabled = false
+  selectedFiles = event.target.files
+
+  showPreviews(selectedFiles)
 })
 
 uploadButton.addEventListener('click', () => {
@@ -56,12 +98,34 @@ function showPreviews (files) {
   const previewGrid = document.querySelector('.preview-grid')
 
   for (const file of files) {
+    // Grid consisting of the image previews
     const preview = document.createElement('div')
     preview.classList.add('preview')
 
+    // Image preview
     const img = document.createElement('img')
     img.src = URL.createObjectURL(file)
     preview.appendChild(img)
+
+    // Close button to remove the image
+    const close = document.createElement('img')
+    close.classList.add('remove-image', 'hidden')
+    close.src = 'icons/close_white.svg'
+    close.addEventListener('click', () => {
+      selectedFiles = Array.from(selectedFiles).filter(f => f !== file) // Remove the file from the array
+      preview.remove() // Remove the preview
+      if (previewGrid.children.length === 0) {
+        uploadButton.disabled = true // Disable the button if there are no files left
+      }
+    })
+    preview.appendChild(close)
+
+    preview.addEventListener('mouseenter', function () {
+      this.querySelector('.remove-image').classList.remove('hidden') // Show close button
+    })
+    preview.addEventListener('mouseleave', function () {
+      this.querySelector('.remove-image').classList.add('hidden') // Hide close button
+    })
 
     previewGrid.appendChild(preview)
   }
@@ -100,6 +164,7 @@ function uploadFile (files) {
       }
     })
     .catch(error => {
+      loadingContainer.style.visibility = 'hidden' // Hide loading animation
       console.error(error)
       alert('Error uploading files')
     })
