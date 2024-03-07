@@ -271,7 +271,7 @@ p {
     width: 100%;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 10px;
+    gap: 15px;
     justify-content: center;
     align-items: center;
     text-align: center;
@@ -306,7 +306,8 @@ p {
         --background: #fff;
         -webkit-appearance: none;
         -moz-appearance: none;
-        height: 21px;
+        min-height: 21px;
+        min-width: 21px;
         outline: none;
         display: inline-block;
         vertical-align: top;

@@ -23,7 +23,7 @@ let mode = null
 
 uploadButton.disabled = true
 
-editCheckbox.checked = true
+setModeAndMultiple('image_comparison_editing', true)
 
 window.onload = function () {
   let theme = localStorage.getItem('theme')
@@ -36,29 +36,25 @@ window.onload = function () {
 
 editCheckbox.addEventListener('click', function () {
   if (editCheckbox.checked) {
-    mode = 'image_comparison_editing'
-    fileInput.multiple = true
+    setModeAndMultiple('image_comparison_editing', true)
   }
 })
 
 similarCheckbox.addEventListener('click', function () {
   if (similarCheckbox.checked) {
-    mode = 'image_comparison_subject'
-    fileInput.multiple = true
+    setModeAndMultiple('image_comparison_subject', true)
   }
 })
 
 keepCheckbox.addEventListener('click', function () {
   if (keepCheckbox.checked) {
-    mode = 'keep_or_delete'
-    fileInput.multiple = false
+    setModeAndMultiple('keep_or_delete', false)
   }
 })
 
 ideaCheckbox.addEventListener('click', function () {
   if (ideaCheckbox.checked) {
-    mode = 'idea'
-    fileInput.multiple = false
+    setModeAndMultiple('idea', false)
   }
 })
 
@@ -78,6 +74,11 @@ checkboxContainer.addEventListener('click', function (event) {
         checkboxes[i].checked = false // Uncheck other checkboxes
       }
     }
+  }
+  if (!editCheckbox.checked && !similarCheckbox.checked && !keepCheckbox.checked && !ideaCheckbox.checked) {
+    editCheckbox.checked = true
+    mode = 'image_comparison_editing'
+    fileInput.multiple = true
   }
 })
 
@@ -114,6 +115,11 @@ uploadButton.addEventListener('click', () => {
     alert('Please select multiple files.')
   }
 })
+
+function setModeAndMultiple (modeArg, multiple) {
+  mode = modeArg
+  fileInput.multiple = multiple
+}
 
 function setTheme (theme) {
   let themeImg = darkModeToggle.childNodes[1]

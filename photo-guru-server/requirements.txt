@@ -1,0 +1,6 @@
+Flask==2.2.2
+Flask_Cors==4.0.0
+openai==1.13.3
+Pillow==10.2.0
+rawpy==0.19.1
+Werkzeug==2.2.2
