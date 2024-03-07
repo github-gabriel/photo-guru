@@ -8,12 +8,22 @@ const answer = document.getElementById('answer')
 
 const darkModeToggle = document.getElementById('toggle')
 
+const checkboxContainer = document.querySelector('.checkbox-container')
+
 const darkIcon = 'icons/moon.svg'
 const lightIcon = 'icons/sun.svg'
 
+const editCheckbox = document.getElementById('edit')
+const similarCheckbox = document.getElementById('similar')
+const keepCheckbox = document.getElementById('keep')
+const ideaCheckbox = document.getElementById('idea')
+
 let selectedFiles = null
+let mode = null
 
 uploadButton.disabled = true
+
+editCheckbox.checked = true
 
 window.onload = function () {
   let theme = localStorage.getItem('theme')
@@ -24,11 +34,84 @@ window.onload = function () {
   }
 }
 
+editCheckbox.addEventListener('click', function () {
+  if (editCheckbox.checked) {
+    mode = 'image_comparison_editing'
+    fileInput.multiple = true
+  }
+})
+
+similarCheckbox.addEventListener('click', function () {
+  if (similarCheckbox.checked) {
+    mode = 'image_comparison_subject'
+    fileInput.multiple = true
+  }
+})
+
+keepCheckbox.addEventListener('click', function () {
+  if (keepCheckbox.checked) {
+    mode = 'keep_or_delete'
+    fileInput.multiple = false
+  }
+})
+
+ideaCheckbox.addEventListener('click', function () {
+  if (ideaCheckbox.checked) {
+    mode = 'idea'
+    fileInput.multiple = false
+  }
+})
+
 darkModeToggle.addEventListener('click', function () {
   if (document.body.classList.contains('dark-theme')) {
     setTheme('light')
   } else {
     setTheme('dark')
+  }
+})
+
+checkboxContainer.addEventListener('click', function (event) {
+  if (event.target.type === 'checkbox') {
+    const checkboxes = checkboxContainer.querySelectorAll('input[type="checkbox"]')
+    for (let i = 0; i < checkboxes.length; i++) {
+      if (checkboxes[i] !== event.target) {
+        checkboxes[i].checked = false // Uncheck other checkboxes
+      }
+    }
+  }
+})
+
+dropzone.addEventListener('dragover', (event) => {
+  event.preventDefault()
+  dropzone.classList.add('hover')
+})
+
+dropzone.addEventListener('dragleave', () => {
+  dropzone.classList.remove('hover')
+})
+
+dropzone.addEventListener('drop', dropHandler) // Call defined function
+
+// Handle click on the input field
+fileInput.addEventListener('change', (event) => {
+  event.preventDefault()
+  uploadButton.disabled = false
+  selectedFiles = event.target.files
+
+  showPreviews(selectedFiles)
+})
+
+uploadButton.addEventListener('click', () => {
+  if (selectedFiles && selectedFiles.length > 1 && fileInput.multiple === true || selectedFiles && selectedFiles.length === 1 && fileInput.multiple === false) {
+    uploadFile(selectedFiles)
+    deletePreview()
+    selectedFiles = null // Clear selected files after upload
+  } else if (!selectedFiles) {
+    alert('Please select files to upload.')
+  } else if (selectedFiles && selectedFiles.length > 1 && fileInput.multiple === false) {
+    alert('Please select only one file.')
+  } else if (selectedFiles && selectedFiles.length === 1 && fileInput.multiple === true) {
+    alert('Please select multiple files.')
   }
 })
 
@@ -57,35 +140,18 @@ function dropHandler (event) {
   showPreviews(selectedFiles)
 }
 
-dropzone.addEventListener('dragover', (event) => {
-  event.preventDefault()
-  dropzone.classList.add('hover')
-})
+function isRawFileExtension (fileName) {
+  // Split the filename by the dot (.) to separate extension
+  const parts = fileName.split('.')
+  // Get the extension in lowercase for case-insensitive comparison
+  const extension = parts[parts.length - 1].toLowerCase()
 
-dropzone.addEventListener('dragleave', () => {
-  dropzone.classList.remove('hover')
-})
+  // Array of common raw image extensions
+  const rawExtensions = ['rw2']
 
-dropzone.addEventListener('drop', dropHandler) // Call defined function
-
-// Handle click on the input field
-fileInput.addEventListener('change', (event) => {
-  event.preventDefault()
-  uploadButton.disabled = false
-  selectedFiles = event.target.files
-
-  showPreviews(selectedFiles)
-})
-
-uploadButton.addEventListener('click', () => {
-  if (selectedFiles) {
-    uploadFile(selectedFiles)
-    deletePreview()
-    selectedFiles = null // Clear selected files after upload
-  } else {
-    alert('Please select files to upload.')
-  }
-})
+  // Check if the extension is present in the array
+  return rawExtensions.includes(extension)
+}
 
 function deletePreview () {
   const previewGrid = document.querySelector('.preview-grid')
@@ -103,9 +169,15 @@ function showPreviews (files) {
     preview.classList.add('preview')
 
     // Image preview
-    const img = document.createElement('img')
-    img.src = URL.createObjectURL(file)
-    preview.appendChild(img)
+    if (isRawFileExtension(file.name)) {
+      const p = document.createElement('p')
+      p.textContent = file.name
+      preview.appendChild(p)
+    } else {
+      const img = document.createElement('img')
+      img.src = URL.createObjectURL(file)
+      preview.appendChild(img)
+    }
 
     // Close button to remove the image
     const close = document.createElement('img')
@@ -132,6 +204,7 @@ function showPreviews (files) {
 }
 
 function uploadFile (files) {
+  answer.textContent = '' // Clear answer
   uploadButton.disabled = true // Disable the button
 
   // Loading animation
@@ -145,6 +218,13 @@ function uploadFile (files) {
   }
   if (hintInput.value) {
     formData.append('hint', hintInput.value)
+  }
+  if (mode) {
+    formData.append('mode', mode)
+  } else {
+    alert('Please select a mode')
+    loadingContainer.style.visibility = 'hidden' // Hide loading animation
+    return
   }
 
   // Use Axios for the request
